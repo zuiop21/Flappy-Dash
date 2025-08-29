@@ -11,6 +11,9 @@ class Dash extends PositionComponent {
       );
 
   late Sprite _dashSprite;
+  Vector2 _velocity = Vector2.zero();
+  final Vector2 _gravity = Vector2(0, 900);
+  final Vector2 _jumpForce = Vector2(0, -400);
 
   @override
   Future<void> onLoad() async {
@@ -19,10 +22,15 @@ class Dash extends PositionComponent {
     await super.onLoad();
   }
 
+  void jump() {
+    _velocity = _jumpForce;
+  }
+
   @override
   void update(double dt) {
     super.update(dt);
-    position = Vector2.zero();
+    _velocity += _gravity * dt;
+    position += _velocity * dt;
   }
 
   @override
