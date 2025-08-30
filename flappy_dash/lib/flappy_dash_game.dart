@@ -1,8 +1,10 @@
+import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flappy_dash/component/dash.dart';
 import 'package:flappy_dash/component/dash_parallax_background.dart';
+import 'package:flappy_dash/component/pipe_pair.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,7 +12,7 @@ class FlappyDashGame extends FlameGame<FlappyDashWorld> with KeyboardEvents {
   FlappyDashGame()
     : super(
         world: FlappyDashWorld(),
-        camera: CameraComponent.withFixedResolution(width: 720, height: 1280),
+        camera: CameraComponent.withFixedResolution(width: 600, height: 800),
       );
 
   @override
@@ -28,14 +30,45 @@ class FlappyDashGame extends FlameGame<FlappyDashWorld> with KeyboardEvents {
   }
 }
 
-class FlappyDashWorld extends World with TapCallbacks {
+class FlappyDashWorld extends World
+    with TapCallbacks, HasGameReference<FlappyDashGame> {
   late Dash _dash;
+  late PipePair _lastPipe;
+  static const double _distance = 400;
+
   @override
   void onLoad() {
     super.onLoad();
     add(DashParallaxBackground());
 
     add(_dash = Dash());
+    _generatePipes(fromX: _distance);
+  }
+
+  void _generatePipes({int count = 5, double fromX = 0.0}) {
+    for (var i = 0; i < count; i++) {
+      final area = 600;
+      final y = (Random().nextDouble() * area) - (area / 2);
+      add(_lastPipe = PipePair(position: Vector2(fromX + (i * _distance), y)));
+    }
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (_dash.x >= _lastPipe.x) {
+      _generatePipes(fromX: _distance);
+      _removePipes();
+    }
+    // game.camera.viewfinder.zoom = 0.1;
+  }
+
+  void _removePipes() {
+    final pipes = children.whereType<PipePair>();
+    final shouldBeRemoved = max(pipes.length - 5, 0);
+    pipes.take(shouldBeRemoved).forEach((pipe) {
+      pipe.removeFromParent();
+    });
   }
 
   @override
