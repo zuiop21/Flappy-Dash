@@ -1,3 +1,4 @@
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 
@@ -16,6 +17,8 @@ class Pipe extends PositionComponent {
     const width = 82.0;
     size = Vector2(width, width * ratio);
     isFlipped ? flipVertically() : null;
+
+    add(RectangleHitbox(collisionType: CollisionType.passive));
   }
 
   @override
